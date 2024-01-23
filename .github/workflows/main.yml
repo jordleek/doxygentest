@@ -1,28 +1,28 @@
-name: GitHub Pages
+name: Generate and Deploy Documentation
 
 on:
   push:
     branches:
-      - main  # Set a branch name to trigger deployment
-  
+      - main  # Trigger the workflow on push events to the main branch
+
 jobs:
-  deploy:
-    runs-on: ubuntu-22.04
-    permissions:
-      contents: write
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
     steps:
-      - name: Doxygen Action
-        uses: mattnotmitt/doxygen-action@1.9.5
-        with: 
-          working-directory: '.'
-          doxyfile-path: 'docs/doxygen'
-          
-      - name: Deploy
-        uses: peaceiris/actions-gh-pages@v3
-        # If you're changing the branch from main,
-        # also change the `main` in `refs/heads/main`
-        # below accordingly.
-        if: github.ref == 'refs/heads/main'
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./public
+    - name: Checkout
+      uses: actions/checkout@v2  # Checkout the repository content
+
+    - name: Install Doxygen
+      run: sudo apt-get install doxygen  # Install Doxygen
+
+    - name: Generate Documentation using Doxygen
+      uses: mattnotmitt/doxygen-action@v1
+      with:
+        doxygen_version: '1.9.1'  # Specify the version of Doxygen to use
+
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}  # Use a built-in GitHub token for authentication
+        publish_dir: ./html  # Directory where Doxygen outputs the documentation
